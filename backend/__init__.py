@@ -1,41 +1,36 @@
-import threading
-import socket
 import ssl
+
+from twisted.internet import ssl, reactor
+from twisted.internet.protocol import ServerFactory, Protocol
+
+
+class Echo(Protocol):
+    def connectionMade(self):
+        self.factory.clients.append(self)
+        print("Currently %d open connections.\n" % len(self.factory.clients))
+
+    def connectionLost(self, reason):
+        self.factory.clients.remove(self)
+        print("Lost connection")
+
+    def dataReceived(self, data):
+        response = self.factory.data_callback_fn(data)
+        """As soon as any data is received, write it back."""
+        self.transport.write(response)
+
+
+class MyServerFactory(ServerFactory):
+    protocol = Echo
+
+    def __init__(self, data_callback_fn):
+        self.clients = []
+        self.data_callback_fn = data_callback_fn
 
 
 class SSLServer:
     def __init__(self, callback_fn, port=10023):
-        self.callback_fn = callback_fn
-        self.port = port
-
-        self.context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        self.context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
-
-        thread = threading.Thread(target=self.run, args=())
-        thread.daemon = False
-
-        thread.start()
-
-    def get_socket(self):
-        bindsocket = socket.socket()
-        bindsocket.bind(('', self.port))
-        bindsocket.listen()
-        return bindsocket
-
-    def deal_with_client(self, connstream):
-        data = connstream.read()
-        while data:
-            self.callback_fn(data)
-            data = connstream.read()
-
-    def run(self):
-        bindsocket = self.get_socket()
-        newsocket, fromaddr = bindsocket.accept()
-        while True:
-            connstream = self.context.wrap_socket(newsocket, server_side=True)
-            try:
-                self.deal_with_client(connstream)
-            finally:
-                connstream.shutdown(socket.SHUT_RDWR)
-                connstream.close()
-
+        factory = MyServerFactory(data_callback_fn=callback_fn)
+        reactor.listenSSL(8000, factory,
+                          ssl.DefaultOpenSSLContextFactory(
+                              'key.pem', 'cert.pem'))
+        reactor.run()

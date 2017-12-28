@@ -10,7 +10,10 @@ class PluginManager:
         self.plugins[name]["functions"] = functions
 
     def deregister_plugin(self, name):
-        self.plugins.remove(name)
+        if self.plugins.pop(name, None) is not None:
+            return True
+        else:
+            return False
 
     def find_plugin_by_type(self, type):
         for plugin_name in self.plugins:

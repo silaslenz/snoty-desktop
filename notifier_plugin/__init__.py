@@ -5,3 +5,4 @@ Notify.init("Snoty")
 
 def create_notification(text):
     Notify.Notification.new(text).show()
+    return text.encode()

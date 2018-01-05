@@ -1,8 +1,11 @@
 import logging
 import ssl
+import keyring
 
 from twisted.internet import ssl, reactor
 from twisted.internet.protocol import ServerFactory, Protocol
+
+from backend.ctx_factory import CtxFactory
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,7 @@ class MyServerFactory(ServerFactory):
 
 
 class SSLServer:
-    def __init__(self, callback_fn: object, port: int = 8000) -> None:
+    def __init__(self, callback_fn: object, use_keyring, port: int = 8000) -> None:
         """
         Opens an echo socket server.
         :param callback_fn: Function to call when message was received
@@ -40,7 +43,12 @@ class SSLServer:
         """
         logger.info("Starting server")
         factory = MyServerFactory(data_callback_fn=callback_fn)
-        reactor.listenSSL(port, factory,
-                          ssl.DefaultOpenSSLContextFactory(
-                              'key.pem', 'cert.pem'))
+        if use_keyring:
+            key = keyring.get_password("snoty", "key")
+            certificate = keyring.get_password("snoty", "cert")
+            reactor.listenSSL(port, factory, CtxFactory(key, certificate))
+        else:
+            reactor.listenSSL(port, factory,
+                              ssl.DefaultOpenSSLContextFactory(
+                                  'key.pem', 'cert.pem'))
         reactor.run()

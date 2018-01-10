@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def create_self_signed_cert() -> (bytes, bytes):
     """
     Generate a certificate key pair.
-    :return: certificate, key
+    :return: certificate, key, fingerprint
     """
     # create a key pair)
     k = crypto.PKey()
@@ -29,7 +29,7 @@ def create_self_signed_cert() -> (bytes, bytes):
 
     cert_dump = crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
     key_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, k)
-    return cert_dump, key_dump
+    return cert_dump, key_dump, cert.digest("sha256")
 
 
 def save_cert_in_keyring(cert):
@@ -38,6 +38,10 @@ def save_cert_in_keyring(cert):
 
 def save_key_in_keyring(key):
     keyring.set_password("snoty", "key", key)
+
+
+def save_fingerprint_in_keyring(fingerprint):
+    keyring.set_password("snoty", "fingerprint", fingerprint)
 
 
 def get_cert_from_keyring():
@@ -49,6 +53,7 @@ def get_key_from_keyring():
 
 
 if __name__ == "__main__":
-    cert, key = create_self_signed_cert()
-    save_cert_in_keyring(cert)
-    save_key_in_keyring(key)
+    cert, key, fingerprint = create_self_signed_cert()
+    print(fingerprint)
+    # save_cert_in_keyring(cert)
+    # save_key_in_keyring(key)

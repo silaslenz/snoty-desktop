@@ -52,4 +52,4 @@ class SSLServer:
             reactor.listenSSL(port, factory,
                               ssl.DefaultOpenSSLContextFactory(
                                   'key.pem', 'cert.pem'))
-        reactor.run()
+        reactor.run(installSignalHandlers=False)

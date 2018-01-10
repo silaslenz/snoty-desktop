@@ -1,8 +1,9 @@
 from gi.repository import Notify
 
-Notify.init("Snoty")
 
 
-def create_notification(text):
-    Notify.Notification.new(text).show()
-    return text.encode()
+
+def create_notification(body):
+    Notify.init(body["title"])
+    Notify.Notification.new(body["text"]).show()
+    return body["title"].encode()

@@ -14,6 +14,7 @@ class Echo(Protocol):
     def connectionMade(self):
         self.factory.clients.append(self)
         logger.debug("Currently %d open connections.\n" % len(self.factory.clients))
+        logger.debug(self.factory.clients)
 
     def connectionLost(self, reason):
         self.factory.clients.remove(self)

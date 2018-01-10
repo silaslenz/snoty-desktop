@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # Register a plugin to manage incoming messages
     plugin_manager = frontend.PluginManager()
     # plugin_manager.register_plugin("printer", ["notification"],[print_stuff])  # Print notifications to console
-    plugin_manager.register_plugin("Linux notifications", ["notification"],
+    plugin_manager.register_plugin("Linux notifications", ["NotificationPosted"],
                                    [notifier_plugin.create_notification])  # Show notifications as desktop notifications
     logger.info("Starting server")
     server = backend.SSLServer(plugin_manager.handle_message, USE_KEYRING)

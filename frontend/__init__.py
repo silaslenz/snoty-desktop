@@ -59,7 +59,7 @@ class PluginManager:
         """
         logger.info(f"Processing message with content '{message}'")
         message = json.loads(message)
-        plugin_function = self.find_plugin_by_type(message["type"])
-        response = plugin_function(message["data"])
+        plugin_function = self.find_plugin_by_type(message["header"]["type"])
+        response = plugin_function(message["body"])
         logger.info(f"Return message has content '{response}'")
         return response

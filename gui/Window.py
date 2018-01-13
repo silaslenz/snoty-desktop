@@ -7,18 +7,24 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QLabel
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, ip, fingerprint, myThread):
+    def __init__(self, ip, fingerprint, server_thread):
+        """
+        Main window. Shows image with qr code generated from arguments
+        :param ip: Local ip adress
+        :param fingerprint: Fingerprint (sha256) of certificate
+        :param server_thread: backend.ServerThread
+        """
         QMainWindow.__init__(self)
 
-        self.myThread = myThread
+        self.server_thread = server_thread
         self.setMinimumSize(QSize(640, 480))
         self.setWindowTitle("Snoty")
 
-        centralWidget = QWidget(self)
-        self.setCentralWidget(centralWidget)
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
 
-        gridLayout = QGridLayout(self)
-        centralWidget.setLayout(gridLayout)
+        grid_layout = QGridLayout(central_widget)
+        central_widget.setLayout(grid_layout)
 
         title = QLabel("Hello cats!", self)
         title.setAlignment(QtCore.Qt.AlignCenter)
@@ -27,9 +33,13 @@ class MainWindow(QMainWindow):
         image = ImageQt(img)
         pixmap = QPixmap.fromImage(image)
         title.setPixmap(pixmap)
-        gridLayout.addWidget(title, 0, 0)
+        grid_layout.addWidget(title, 0, 0)
 
     def closeEvent(self, event):
-        self.myThread.stopreactor()
-        self.myThread.wait()
+        """
+        Called when window closes. Asks twisted to shut down and continues closing when done.
+        :param event:
+        """
+        self.server_thread.stop_reactor()
+        self.server_thread.wait()
         event.accept()

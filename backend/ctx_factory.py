@@ -2,7 +2,8 @@ from OpenSSL import SSL, crypto
 from twisted.internet import ssl
 
 
-# Custom Contextfactory, identical to DefaultOpenSSLContextFactory, except for the fact that it takes the key/cert as string instead of filenames
+# Custom Contextfactory, identical to DefaultOpenSSLContextFactory,
+# except for the fact that it takes the key/cert as string instead of filenames
 
 
 class CtxFactory(ssl.ContextFactory):
@@ -16,11 +17,11 @@ class CtxFactory(ssl.ContextFactory):
         """
     _context = None
 
-    def __init__(self, private_key, certificate,
+    def __init__(self, private_key: str, certificate: str,
                  sslmethod=SSL.SSLv23_METHOD, _contextFactory=SSL.Context):
         """
-        @param privateKeyFileName: Name of a file containing a private key
-        @param certificateFileName: Name of a file containing a certificate
+        @param private_key: private key
+        @param certificate: certificate
         @param sslmethod: The SSL method to use
         """
         self.private_key = private_key

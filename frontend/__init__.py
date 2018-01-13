@@ -14,18 +14,18 @@ class PluginManager:
         self.plugins = {}
         logger.info("Starting plugin manager")
 
-    def register_plugin(self, name: str, types: list, functions: list) -> None:
+    def register_plugin(self, name: str, message_types: list, functions: list) -> None:
         """
         Register a new plugin. Index x in 'types' must match index x in 'functions'.
         :param name: Name of the plugin
-        :param types: List of strings for the types of messages this plugin handles
+        :param message_types: List of strings for the types of messages this plugin handles
         :param functions: List of functions corresponding to the types in the previous lists
         """
-        assert (len(types) == len(functions))
+        assert (len(message_types) == len(functions))
         self.plugins[name] = {}
-        self.plugins[name]["types"] = types
+        self.plugins[name]["types"] = message_types
         self.plugins[name]["functions"] = functions
-        logger.info(f"Plugin named '{name}' with types: {types} and functions: {functions} registered.")
+        logger.info(f"Plugin named '{name}' with message types: {message_types} and functions: {functions} registered.")
 
     def deregister_plugin(self, name: str) -> bool:
         """
@@ -37,19 +37,19 @@ class PluginManager:
             logger.info(f"Plugin named '{name}' deregistered")
             return True
         else:
-            logger.warn(f"Plugin named '{name}' not found. Deregistration unsuccessful")
+            logger.warning(f"Plugin named '{name}' not found. Deregistration unsuccessful")
             return False
 
-    def find_plugin_by_type(self, type: str) -> FunctionType:
+    def find_plugin_by_type(self, message_type: str) -> FunctionType:
         """
         Find the first plugin function matching the requested type.
-        :param type: Type to search for
+        :param message_type: Type to search for
         :return: The function handling the requested type, if it exists.
         """
         for plugin_name in self.plugins:
-            if type in self.plugins[plugin_name]["types"]:
+            if message_type in self.plugins[plugin_name]["types"]:
                 logger.info(f"Found plugin named '{plugin_name}' to handle type {type}")
-                return self.plugins[plugin_name]["functions"][self.plugins[plugin_name]["types"].index(type)]
+                return self.plugins[plugin_name]["functions"][self.plugins[plugin_name]["types"].index(message_type)]
 
     def handle_message(self, message: str) -> object:
         """

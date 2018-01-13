@@ -39,31 +39,35 @@ class MyServerFactory(ServerFactory):
         self.data_callback_fn = data_callback_fn
 
 
-class SSLServer:
-    def __init__(self, callback_fn: object, use_keyring, port: int = 8000) -> None:
-        """
-        Opens an echo socket server.
-        :param callback_fn: Function to call when message was received
-        :param port: Port to use
-        """
-        logger.info("Starting server")
-        factory = MyServerFactory(data_callback_fn=callback_fn)
-        if use_keyring:
-            key = keyring.get_password("snoty", "key")
-            certificate = keyring.get_password("snoty", "cert")
-            reactor.listenSSL(port, factory, CtxFactory(key, certificate))
-        else:
-            reactor.listenSSL(port, factory,
-                              ssl.DefaultOpenSSLContextFactory(
-                                  'key.pem', 'cert.pem'))
-        reactor.run(installSignalHandlers=False)
-        print("stopped")
+def start_reactor(callback_fn: object, use_keyring, port: int = 8000) -> None:
+    """
+    Opens an echo socket server.
+    :param use_keyring: Whether to load certificate and key from keyring or files.
+    :param callback_fn: Function to call when message was received
+    :param port: Port to use
+    """
+    logger.info("Starting server")
+    factory = MyServerFactory(data_callback_fn=callback_fn)
+    if use_keyring:
+        key = keyring.get_password("snoty", "key")
+        certificate = keyring.get_password("snoty", "cert")
+        reactor.listenSSL(port, factory, CtxFactory(key, certificate))
+    else:
+        reactor.listenSSL(port, factory,
+                          ssl.DefaultOpenSSLContextFactory(
+                              'key.pem', 'cert.pem'))
+    reactor.run(installSignalHandlers=False)
+    print("stopped")
+
 
 class ServerThread(QThread):
-
-    def __init__(self, USE_KEYRING):
+    def __init__(self, use__keyring):
+        """
+        Sets up and runs the twisted ssl socket server.
+        :param use__keyring:
+        """
         QThread.__init__(self)
-        self.USE_KEYRING = USE_KEYRING
+        self.use__keyring = use__keyring
 
     def __del__(self):
         self.wait()
@@ -72,14 +76,16 @@ class ServerThread(QThread):
         logger.info("Starting plugin manager")
         # Register a plugin to manage incoming messages
         plugin_manager = frontend.PluginManager()
-        # plugin_manager.register_plugin("printer", ["notification"],[print_stuff])  # Print notifications to console
+        # Show notifications as desktop notificationsL
         plugin_manager.register_plugin("Linux notifications", ["NotificationPosted"],
                                        [
-                                           notifier_plugin.create_notification])  # Show notifications as desktop notifications
+                                           notifier_plugin.create_notification])
         logger.info("Starting server")
-        SSLServer(plugin_manager.handle_message, self.USE_KEYRING)
+        start_reactor(plugin_manager.handle_message, self.use__keyring)
 
-    def stopreactor(self):
-        print("stopping")
+    @staticmethod
+    def stop_reactor():
+        """
+        Stops the reactor from running so the thread can stop.
+        """
         reactor.callFromThread(reactor.stop)
-        print("stopping")

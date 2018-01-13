@@ -1,4 +1,6 @@
-import socket, ssl, pprint, json
+import pprint
+import socket
+import ssl
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

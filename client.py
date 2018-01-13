@@ -10,35 +10,11 @@ ssl_sock = ssl.wrap_socket(s,
 
 ssl_sock.connect(('localhost', 8000))
 
-print (repr(ssl_sock.getpeername()))
-print (ssl_sock.cipher())
-print (pprint.pformat(ssl_sock.getpeercert()))
+print(repr(ssl_sock.getpeername()))
+print(ssl_sock.cipher())
+print(pprint.pformat(ssl_sock.getpeercert()))
 
-ssl_sock.write("""{
-   "header":{
-      "type":"NotificationPosted",
-      "version":"1"
-   },
-   "body":{
-      "id":"com.textra#4",
-      "package":"com.textra",
-      "title":"Big Text",
-    "text":"Notification Sub Text",
-        "actions":[
-         {
-            "id":0,
-            "label":"Als ungelesen markieren",
-            "input":false
-         },
-         {
-            "id":1,
-            "label":"Antworten",
-            "input":true
-         }
-      ],
-    "clearable":true
-   }
-}
-""".encode())
+ssl_sock.write(
+    '{"header":{"type":"NotificationPosted",      "version":"1"   },   "body":{      "id":"com.textra#4",      "package":"com.textra",      "title":"Big Text",    "text":"Notification Sub Text",        "actions":[         {            "id":0,            "label":"Als ungelesen markieren",            "input":false         },         {            "id":1,            "label":"Antworten",            "input":true         }      ],    "clearable":true   }}\n{"header":{"type":"NotificationPosted",      "version":"1"   },   "body":{      "id":"com.textra#4",      "package":"com.textra",      "title":"Big text 2",    "text":"Notification Sub Text",        "actions":[         {            "id":0,            "label":"Als ungelesen markieren",            "input":false         },         {            "id":1,            "label":"Antworten",            "input":true         }      ],    "clearable":true   }}'.encode())
 
 print(f"Response: {ssl_sock.read()}")

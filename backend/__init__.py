@@ -1,7 +1,7 @@
 import logging
 import ssl
-import keyring
 
+import keyring
 from twisted.internet import ssl, reactor
 from twisted.internet.protocol import ServerFactory, Protocol
 
@@ -22,9 +22,10 @@ class Echo(Protocol):
 
     def dataReceived(self, data):
         logger.debug("Received data")
-        response = self.factory.data_callback_fn(data)
-        # As soon as any data is received, write it back.
-        self.transport.write(response)
+        for line in data.split(b"\n"):
+            response = self.factory.data_callback_fn(line)
+            # As soon as any data is received, write it back.
+            self.transport.write(response)
 
 
 class MyServerFactory(ServerFactory):

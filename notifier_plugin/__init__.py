@@ -6,10 +6,7 @@ notify2.init("Snoty", "qt")
 
 
 def notification_callback(object, data, socket):
-    print("callback", object, data)
-    print(data)
-    socket.transport.write(data.encode())
-    print("sentstuff")
+    socket.transport.write(data.encode()+b"\n")
 
 
 def create_notification(body, socket):

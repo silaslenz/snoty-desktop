@@ -1,15 +1,14 @@
 import notify2
-import dbus
-notifications = []
+
+notify2.init("Snoty", 'qt')
 
 
 def notification_callback(object, data):
     print("callback")
 
-def create_notification(body):
-    notify2.init(body["title"])
 
-    notification = notify2.Notification("text")
+def create_notification(body):
+    notification = notify2.Notification(body["title"], body["text"])
     notification.add_action(
         "action_click",
         "Reply to Message",
@@ -17,5 +16,4 @@ def create_notification(body):
         None  # Arguments
     )
     notification.show()
-    notifications.append(notification)
     return body["title"].encode()

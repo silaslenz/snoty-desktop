@@ -2,9 +2,12 @@ import logging
 import ssl
 
 import keyring
+from PySide.QtCore import QThread
 from twisted.internet import ssl, reactor
 from twisted.internet.protocol import ServerFactory, Protocol
 
+import frontend
+import notifier_plugin
 from backend.ctx_factory import CtxFactory
 
 logger = logging.getLogger(__name__)
@@ -54,3 +57,29 @@ class SSLServer:
                               ssl.DefaultOpenSSLContextFactory(
                                   'key.pem', 'cert.pem'))
         reactor.run(installSignalHandlers=False)
+        print("stopped")
+
+class ServerThread(QThread):
+
+    def __init__(self, USE_KEYRING):
+        QThread.__init__(self)
+        self.USE_KEYRING = USE_KEYRING
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        logger.info("Starting plugin manager")
+        # Register a plugin to manage incoming messages
+        plugin_manager = frontend.PluginManager()
+        # plugin_manager.register_plugin("printer", ["notification"],[print_stuff])  # Print notifications to console
+        plugin_manager.register_plugin("Linux notifications", ["NotificationPosted"],
+                                       [
+                                           notifier_plugin.create_notification])  # Show notifications as desktop notifications
+        logger.info("Starting server")
+        SSLServer(plugin_manager.handle_message, self.USE_KEYRING)
+
+    def stopreactor(self):
+        print("stopping")
+        reactor.callFromThread(reactor.stop)
+        print("stopping")

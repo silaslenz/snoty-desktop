@@ -3,12 +3,9 @@ import sys
 from os.path import exists
 
 import keyring
-from PySide.QtCore import QThread
-from PySide.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 
 import backend
-import frontend
-import notifier_plugin
 import sslcert
 from gui.Window import MainWindow
 
@@ -33,26 +30,6 @@ def certificate_and_key_exist():
         else:
             logger.info("Cert and key found in files")
             return True
-
-
-class ServerThread(QThread):
-
-    def __init__(self):
-        QThread.__init__(self)
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        logger.info("Starting plugin manager")
-        # Register a plugin to manage incoming messages
-        plugin_manager = frontend.PluginManager()
-        # plugin_manager.register_plugin("printer", ["notification"],[print_stuff])  # Print notifications to console
-        plugin_manager.register_plugin("Linux notifications", ["NotificationPosted"],
-                                       [
-                                           notifier_plugin.create_notification])  # Show notifications as desktop notifications
-        logger.info("Starting server")
-        backend.SSLServer(plugin_manager.handle_message, USE_KEYRING)
 
 
 def create_certificate_and_key():
@@ -88,6 +65,8 @@ if __name__ == "__main__":
         create_certificate_and_key()
 
     app = QApplication(sys.argv)
-    mainWin = MainWindow(get_local_ip(), keyring.get_password("snoty", "fingerprint"), ServerThread)
+    myThread = backend.ServerThread(USE_KEYRING)
+    myThread.start()
+    mainWin = MainWindow(get_local_ip(), keyring.get_password("snoty", "fingerprint"), myThread)
     mainWin.show()
     sys.exit(app.exec_())

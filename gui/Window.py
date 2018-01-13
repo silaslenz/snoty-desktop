@@ -1,20 +1,16 @@
 import qrcode
-import sys
-import PySide
-sys.modules['PyQt5'] = PySide
-from PySide import QtCore
-from PySide.QtCore import QSize
-from PySide.QtGui import QMainWindow, QWidget, QGridLayout, QLabel, QPixmap
-
-
 from PIL.ImageQt import ImageQt
-
+from PyQt5 import QtCore
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QLabel
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, ip, fingerprint, ServerThread):
+    def __init__(self, ip, fingerprint, myThread):
         QMainWindow.__init__(self)
 
+        self.myThread = myThread
         self.setMinimumSize(QSize(640, 480))
         self.setWindowTitle("Snoty")
 
@@ -32,5 +28,8 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap.fromImage(image)
         title.setPixmap(pixmap)
         gridLayout.addWidget(title, 0, 0)
-        self.myThread = ServerThread()
-        self.myThread.start()
+
+    def closeEvent(self, event):
+        self.myThread.stopreactor()
+        self.myThread.wait()
+        event.accept()

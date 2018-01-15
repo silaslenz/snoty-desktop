@@ -48,7 +48,7 @@ class PluginManager:
         """
         for plugin_name in self.plugins:
             if message_type in self.plugins[plugin_name]["types"]:
-                logger.info(f"Found plugin named '{plugin_name}' to handle type {type}")
+                logger.info(f"Found plugin named '{plugin_name}' to handle type {message_type}")
                 return self.plugins[plugin_name]["functions"][self.plugins[plugin_name]["types"].index(message_type)]
 
     def handle_message(self, message: str, socket) -> object:
@@ -59,7 +59,7 @@ class PluginManager:
         """
         logger.info(f"Processing message with content '{message}'")
         message = json.loads(message)
-        plugin_function = self.find_plugin_by_type(message["header"]["type"])
-        response = plugin_function(message["body"], socket)
+        plugin_function = self.find_plugin_by_type(message["type"])
+        response = plugin_function(message, socket)
         logger.info(f"Return message has content '{response}'")
         return response

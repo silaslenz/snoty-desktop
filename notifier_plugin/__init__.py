@@ -28,5 +28,5 @@ def create_notification(body, socket):
         notification_callback,
         socket
         )
-        notification.show()
-        return body["title"].encode()
+    notification.show()
+    return body["title"].encode()

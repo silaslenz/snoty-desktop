@@ -34,74 +34,95 @@ def create_self_signed_cert() -> (bytes, bytes, str):
     return cert_dump, key_dump, cert.digest("sha256")
 
 
-def save_cert_in_keyring(cert):
-    keyring.set_password("snoty", "cert", cert)
+class SecretManager:
+    def __init__(self, use_keyring):
+        self.use_keyring = use_keyring
 
-
-def save_key_in_keyring(key):
-    keyring.set_password("snoty", "key", key)
-
-
-def save_fingerprint_in_keyring(fingerprint):
-    keyring.set_password("snoty", "fingerprint", fingerprint)
-
-
-def save_secret_in_keyring(secret):
-    keyring.set_password("snoty", "secret", secret)
-
-
-def get_cert_from_keyring():
-    keyring.get_password("snoty", "cert")
-
-
-def get_key_from_keyring():
-    keyring.get_password("snoty", "key")
-
-
-def get_secret_from_keyring():
-    keyring.get_password("snoty", "secret")
-
-def create_certificate_and_key(use_keyring: bool) -> None:
-    """
-    Creates a self signed certificate, key and fingerprint, and then saves them.
-    :param use_keyring: Save in keyring or files.
-    """
-    logger.info("Cert and key NOT found, now generating")
-    cert, key, fingerprint = create_self_signed_cert()
-    if use_keyring:
-        save_cert_in_keyring(cert)
-        save_key_in_keyring(key)
-        save_fingerprint_in_keyring(fingerprint)
-        save_secret_in_keyring(secrets.token_hex(16))
-        logger.info("Cert and key saved in keyring")
-    else:
-        with open("cert.pem", "wb") as cert_file:
-            cert_file.write(cert)
-        with open("key.pem", "wb") as key_file:
-            key_file.write(key)
-        with open("fingerprint.pem", "wb") as key_file:
-            key_file.write(fingerprint)
-        with open("secret.pem", "wb") as key_file:
-            key_file.write(secrets.token_hex(16))
-        logger.info("Cert and key saved in files")
-
-
-def certificate_and_key_exist(use_keyring: bool) -> bool:
-    """
-    Checks if certificate, key and fingerprint exists.
-    :param use_keyring: Check in keyring or files.
-    :return: If certificate, key and fingerprint exist.
-    """
-    if use_keyring:
-        if keyring.get_password("snoty", "key") and keyring.get_password("snoty", "cert") and keyring.get_password(
-                "snoty", "fingerprint") and keyring.get_password("snoty", "secret"):
-            logger.info("Cert and key found in keyring")
-            return True
+    def save_cert(self, cert):
+        if self.use_keyring:
+            keyring.set_password("snoty", "cert", cert)
         else:
-            return False
-    else:
-        if not exists("cert.pem") or not exists("key.pem") or not exists("fingerprint.pem") or not exists("secret.pem"):
-            return False
+            with open("cert.pem", "wb") as cert_file:
+                cert_file.write(cert)
+
+
+    def save_key(self, key):
+        if self.use_keyring:
+            keyring.set_password("snoty", "key", key)
         else:
-            logger.info("Cert and key found in files")
-            return True
+            with open("key.pem", "wb") as key_file:
+                key_file.write(key)
+
+    def save_fingerprint(self, fingerprint):
+        if self.use_keyring:
+            keyring.set_password("snoty", "fingerprint", fingerprint)
+        else:
+            with open("fingerprint.pem", "wb") as key_file:
+                key_file.write(fingerprint)
+
+    def save_secret(self, secret):
+        if self.use_keyring:
+            keyring.set_password("snoty", "secret", secret)
+        else:
+            with open("secret.pem", "wb") as key_file:
+                key_file.write(secrets.token_hex(16).encode())
+
+    def get_cert_from_keyring(self):
+        keyring.get_password("snoty", "cert")
+
+    def get_key_from_keyring(self):
+        keyring.get_password("snoty", "key")
+
+    def get_secret_from_keyring(self):
+        keyring.get_password("snoty", "secret")
+
+    def get_fingerprint(self):
+        if self.use_keyring:
+            return keyring.get_password("snoty", "fingerprint")
+        else:
+            with open("fingerprint.pem", "rb") as key_file:
+                return key_file.read().decode("ascii")
+
+    def get_secret(self):
+        if self.use_keyring:
+            return keyring.get_password("snoty", "secret")
+        else:
+            with open("secret.pem", "rb") as key_file:
+                return key_file.read().decode("ascii")
+
+    def create_certificate_and_key(self) -> None:
+        """
+        Creates a self signed certificate, key and fingerprint, and then saves them.
+        :param use_keyring: Save in keyring or files.
+        """
+        logger.info("Cert and key NOT found, now generating")
+        cert, key, fingerprint = create_self_signed_cert()
+
+        self.save_cert(cert)
+        self.save_key(key)
+        self.save_fingerprint(fingerprint)
+        self.save_secret(secrets.token_hex(16))
+        logger.info("Cert and key saved")
+
+    def certificate_and_key_exist(self) -> bool:
+        """
+        Checks if certificate, key and fingerprint exists.
+        :param use_keyring: Check in keyring or files.
+        :return: If certificate, key and fingerprint exist.
+        """
+        if self.use_keyring:
+            if keyring.get_password("snoty", "key") and keyring.get_password("snoty", "cert") and keyring.get_password(
+                    "snoty", "fingerprint") and keyring.get_password("snoty", "secret"):
+                logger.info("Cert and key found in keyring")
+                return True
+            else:
+                return False
+        else:
+            if not exists("cert.pem") or not exists("key.pem") or not exists("fingerprint.pem") or not exists(
+                    "secret.pem"):
+                return False
+            else:
+                logger.info("Cert and key found in files")
+                return True
+
+

@@ -16,7 +16,7 @@ print(ssl_sock.cipher())
 print(pprint.pformat(ssl_sock.getpeercert()))
 
 ssl_sock.write(
-    '{"type": "NotificationPosted", "id": "com.textra#4", "package": "com.textra", "isUpdate": true, "title": "Big Text", "text": "Notification Sub Text", "actions": [{"id": 0, "label": "Als ungelesen markieren", "input": false}, {"id": 1, "label": "Antworten", "input": true}], "clearable": true}\n'.encode())
+    '{"secret" : "cat", "type": "NotificationPosted", "id": "com.textra#4", "package": "com.textra", "isUpdate": true, "title": "Big Text", "text": "Notification Sub Text", "actions": [{"id": 0, "label": "Als ungelesen markieren", "input": false}, {"id": 1, "label": "Antworten", "input": true}], "clearable": true}\n'.encode())
 
 
 

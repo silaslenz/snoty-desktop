@@ -12,6 +12,8 @@ import notifier_plugin
 from backend.ctx_factory import CtxFactory
 
 logger = logging.getLogger(__name__)
+p = 0
+
 
 
 class Echo(Protocol):
@@ -27,7 +29,8 @@ class Echo(Protocol):
     def dataReceived(self, data):
         logger.debug("Received data")
         for message in [line for line in data.split(b"\n") if line]:
-            if json.loads(message)["secret"] == sslcert.get_secret_from_keyring():
+            print(p)
+            if json.loads(message)["secret"] == self.factory.secret_manager.get_secret():
                 self.factory.data_callback_fn(message, self)
             else:
                 logger.error("Invalid secret received")
@@ -36,12 +39,13 @@ class Echo(Protocol):
 class MyServerFactory(ServerFactory):
     protocol = Echo
 
-    def __init__(self, data_callback_fn):
+    def __init__(self, data_callback_fn, secret_manager):
+        self.secret_manager = secret_manager
         self.clients = []
         self.data_callback_fn = data_callback_fn
 
 
-def start_reactor(callback_fn: object, use_keyring, port: int = 9096) -> None:
+def start_reactor(callback_fn: object, use_keyring, secret_manager: sslcert.SecretManager, port: int = 9096) -> None:
     """
     Opens an echo socket server.
     :param use_keyring: Whether to load certificate and key from keyring or files.
@@ -49,12 +53,14 @@ def start_reactor(callback_fn: object, use_keyring, port: int = 9096) -> None:
     :param port: Port to use
     """
     logger.info("Starting server")
-    factory = MyServerFactory(data_callback_fn=callback_fn)
+    factory = MyServerFactory(data_callback_fn=callback_fn, secret_manager=secret_manager)
     if use_keyring:
+        p = 2
         key = keyring.get_password("snoty", "key")
         certificate = keyring.get_password("snoty", "cert")
         reactor.listenSSL(port, factory, CtxFactory(key, certificate))
     else:
+        p= 3
         reactor.listenSSL(port, factory,
                           ssl.DefaultOpenSSLContextFactory(
                               'key.pem', 'cert.pem'))
@@ -63,13 +69,14 @@ def start_reactor(callback_fn: object, use_keyring, port: int = 9096) -> None:
 
 
 class ServerThread(QThread):
-    def __init__(self, use_keyring):
+    def __init__(self, use_keyring, secret_manager):
         """
         Sets up and runs the twisted ssl socket server.
         :param use_keyring:
         """
         QThread.__init__(self)
         self.use_keyring = use_keyring
+        self.secret_manager = secret_manager
 
     def __del__(self):
         self.wait()
@@ -83,7 +90,7 @@ class ServerThread(QThread):
                                        [
                                            notifier_plugin.create_notification])
         logger.info("Starting server")
-        start_reactor(plugin_manager.handle_message, self.use_keyring)
+        start_reactor(plugin_manager.handle_message, self.use_keyring, self.secret_manager)
 
     @staticmethod
     def stop_reactor():

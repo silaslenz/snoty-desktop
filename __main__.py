@@ -1,7 +1,6 @@
 import logging
 import sys
 
-import keyring
 from PyQt5.QtWidgets import QApplication
 
 import backend

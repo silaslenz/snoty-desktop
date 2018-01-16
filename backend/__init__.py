@@ -2,7 +2,7 @@ import logging
 import ssl
 
 import keyring
-from PySide.QtCore import QThread
+from PyQt5.QtCore import QThread
 from twisted.internet import ssl, reactor
 from twisted.internet.protocol import ServerFactory, Protocol
 

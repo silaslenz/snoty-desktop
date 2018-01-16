@@ -26,8 +26,7 @@ class Echo(Protocol):
     def dataReceived(self, data):
         logger.debug("Received data")
         for message in [line for line in data.split(b"\n") if line]:
-            response = self.factory.data_callback_fn(message, self)
-            # As soon as any data is received, write it back.
+            self.factory.data_callback_fn(message, self)
 
 
 class MyServerFactory(ServerFactory):

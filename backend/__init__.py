@@ -38,7 +38,7 @@ class MyServerFactory(ServerFactory):
         self.data_callback_fn = data_callback_fn
 
 
-def start_reactor(callback_fn: object, use_keyring, port: int = 8000) -> None:
+def start_reactor(callback_fn: object, use_keyring, port: int = 9096) -> None:
     """
     Opens an echo socket server.
     :param use_keyring: Whether to load certificate and key from keyring or files.

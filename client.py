@@ -9,8 +9,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ssl_sock = ssl.wrap_socket(s,
                            ca_certs="cert.pem")
 #                           cert_reqs=ssl.CERT_REQUIRED) # Ignore for now, requires file
-
-ssl_sock.connect(('localhost', 8000))
+ssl_sock.connect(('192.168.43.111', 9096))
 
 print(repr(ssl_sock.getpeername()))
 print(ssl_sock.cipher())

@@ -1,5 +1,5 @@
 from genericpath import exists
-
+import secrets
 import keyring
 import logging
 from OpenSSL import crypto
@@ -46,6 +46,10 @@ def save_fingerprint_in_keyring(fingerprint):
     keyring.set_password("snoty", "fingerprint", fingerprint)
 
 
+def save_secret_in_keyring(secret):
+    keyring.set_password("snoty", "secret", secret)
+
+
 def get_cert_from_keyring():
     keyring.get_password("snoty", "cert")
 
@@ -53,6 +57,9 @@ def get_cert_from_keyring():
 def get_key_from_keyring():
     keyring.get_password("snoty", "key")
 
+
+def get_secret_from_keyring():
+    keyring.get_password("snoty", "secret")
 
 def create_certificate_and_key(use_keyring: bool) -> None:
     """
@@ -65,6 +72,7 @@ def create_certificate_and_key(use_keyring: bool) -> None:
         save_cert_in_keyring(cert)
         save_key_in_keyring(key)
         save_fingerprint_in_keyring(fingerprint)
+        save_secret_in_keyring(secrets.token_hex(16))
         logger.info("Cert and key saved in keyring")
     else:
         with open("cert.pem", "wb") as cert_file:
@@ -73,6 +81,8 @@ def create_certificate_and_key(use_keyring: bool) -> None:
             key_file.write(key)
         with open("fingerprint.pem", "wb") as key_file:
             key_file.write(fingerprint)
+        with open("secret.pem", "wb") as key_file:
+            key_file.write(secrets.token_hex(16))
         logger.info("Cert and key saved in files")
 
 
@@ -84,13 +94,13 @@ def certificate_and_key_exist(use_keyring: bool) -> bool:
     """
     if use_keyring:
         if keyring.get_password("snoty", "key") and keyring.get_password("snoty", "cert") and keyring.get_password(
-                "snoty", "fingerprint"):
+                "snoty", "fingerprint") and keyring.get_password("snoty", "secret"):
             logger.info("Cert and key found in keyring")
             return True
         else:
             return False
     else:
-        if not exists("cert.pem") or not exists("key.pem") or not exists("fingerprint.pem"):
+        if not exists("cert.pem") or not exists("key.pem") or not exists("fingerprint.pem") or not exists("secret.pem"):
             return False
         else:
             logger.info("Cert and key found in files")

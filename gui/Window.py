@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QLabel
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, ip, fingerprint, server_thread):
+    def __init__(self, ip, fingerprint, secret, server_thread):
         """
         Main window. Shows image with qr code generated from arguments
         :param ip: Local ip adress
@@ -29,10 +29,11 @@ class MainWindow(QMainWindow):
         title = QLabel("Hello cats!", self)
         title.setAlignment(QtCore.Qt.AlignCenter)
 
-        img = qrcode.make(f"{ip} {fingerprint}".encode(), box_size=6)
+        img = qrcode.make(f"{ip} {fingerprint} {secret}".encode(), box_size=6)
         image = ImageQt(img)
         pixmap = QPixmap.fromImage(image)
         title.setPixmap(pixmap)
+
         grid_layout.addWidget(title, 0, 0)
 
     def closeEvent(self, event):

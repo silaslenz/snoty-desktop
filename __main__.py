@@ -39,6 +39,7 @@ if __name__ == "__main__":
     myThread = backend.ServerThread(USE_KEYRING)
     myThread.start()
 
-    mainWin = MainWindow(get_local_ip(), keyring.get_password("snoty", "fingerprint"), myThread)
+    mainWin = MainWindow(get_local_ip(), keyring.get_password("snoty", "fingerprint"),
+                         keyring.get_password("snoty", "secret"), myThread)
     mainWin.show()
     sys.exit(app.exec_())

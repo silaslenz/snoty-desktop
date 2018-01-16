@@ -1,6 +1,7 @@
 import logging
 import ssl
-
+import sslcert
+import json
 import keyring
 from PyQt5.QtCore import QThread
 from twisted.internet import ssl, reactor
@@ -26,7 +27,10 @@ class Echo(Protocol):
     def dataReceived(self, data):
         logger.debug("Received data")
         for message in [line for line in data.split(b"\n") if line]:
-            self.factory.data_callback_fn(message, self)
+            if json.loads(message)["secret"] == sslcert.get_secret_from_keyring():
+                self.factory.data_callback_fn(message, self)
+            else:
+                logger.error("Invalid secret received")
 
 
 class MyServerFactory(ServerFactory):
@@ -59,13 +63,13 @@ def start_reactor(callback_fn: object, use_keyring, port: int = 9096) -> None:
 
 
 class ServerThread(QThread):
-    def __init__(self, use__keyring):
+    def __init__(self, use_keyring):
         """
         Sets up and runs the twisted ssl socket server.
-        :param use__keyring:
+        :param use_keyring:
         """
         QThread.__init__(self)
-        self.use__keyring = use__keyring
+        self.use_keyring = use_keyring
 
     def __del__(self):
         self.wait()
@@ -79,7 +83,7 @@ class ServerThread(QThread):
                                        [
                                            notifier_plugin.create_notification])
         logger.info("Starting server")
-        start_reactor(plugin_manager.handle_message, self.use__keyring)
+        start_reactor(plugin_manager.handle_message, self.use_keyring)
 
     @staticmethod
     def stop_reactor():

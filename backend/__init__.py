@@ -46,6 +46,7 @@ class MyServerFactory(ServerFactory):
 def start_reactor(callback_fn: object, use_keyring, secret_manager: sslcert.SecretManager, port: int = 9096) -> None:
     """
     Opens an echo socket server.
+    :param secret_manager: An initialised SecretManager
     :param use_keyring: Whether to load certificate and key from keyring or files.
     :param callback_fn: Function to call when message was received
     :param port: Port to use

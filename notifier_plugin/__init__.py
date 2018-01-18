@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QDesktopWidget
 notify2.init("Snoty", "qt")
 
 
-def notification_callback(object, data, extra_input):
+def notification_callback(notification_object, data, extra_input):
     socket, has_input = extra_input
     print(has_input)
     data = json.loads(data)
@@ -17,7 +17,6 @@ def notification_callback(object, data, extra_input):
         from PyQt5 import QtWidgets
 
         gui = QtWidgets.QWidget()
-
 
         widget = gui.geometry()
         screen = QDesktopWidget().screenGeometry()
@@ -41,8 +40,6 @@ def create_notification(message, socket):
             "actionId": action["id"],
             "inputValue": None
         }
-        if action["input"] == True:
-            response["inputValue"] = "cat"
         notification.add_action(
             json.dumps(response),
             action["label"],

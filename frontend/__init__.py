@@ -55,13 +55,14 @@ class PluginManager:
     def handle_message(self, message: str, socket) -> object:
         """
         Process a message using the appropriate plugin
+        :param socket: Socket where the message came from. Should still be open for the response.
         :param message: Json string containing the message to be processed
         :return: Response from message processing.
         """
         logger.info(f"Processing message with content '{message}'")
         message = json.loads(message)
         plugin_function = self.find_plugin_by_type(message["type"])
-        if plugin_function == None:
+        if plugin_function is None:
             logger.warning(f"Unsupported type {message['type']}")
         else:
             response = plugin_function(message, socket)

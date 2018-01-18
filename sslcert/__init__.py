@@ -66,15 +66,6 @@ class SecretManager:
             with open("secret.pem", "wb") as key_file:
                 key_file.write(secrets.token_hex(16).encode())
 
-    def get_cert_from_keyring(self):
-        keyring.get_password("snoty", "cert")
-
-    def get_key_from_keyring(self):
-        keyring.get_password("snoty", "key")
-
-    def get_secret_from_keyring(self):
-        keyring.get_password("snoty", "secret")
-
     def get_fingerprint(self):
         if self.use_keyring:
             return keyring.get_password("snoty", "fingerprint")
@@ -92,7 +83,6 @@ class SecretManager:
     def create_certificate_and_key(self) -> None:
         """
         Creates a self signed certificate, key and fingerprint, and then saves them.
-        :param use_keyring: Save in keyring or files.
         """
         logger.info("Cert and key NOT found, now generating")
         cert, key, fingerprint = create_self_signed_cert()
@@ -106,7 +96,6 @@ class SecretManager:
     def certificate_and_key_exist(self) -> bool:
         """
         Checks if certificate, key and fingerprint exists.
-        :param use_keyring: Check in keyring or files.
         :return: If certificate, key and fingerprint exist.
         """
         if self.use_keyring:

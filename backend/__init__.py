@@ -1,7 +1,7 @@
+import json
 import logging
 import ssl
-import sslcert
-import json
+
 import keyring
 from PyQt5.QtCore import QThread
 from twisted.internet import ssl, reactor
@@ -9,11 +9,10 @@ from twisted.internet.protocol import ServerFactory, Protocol
 
 import frontend
 import notifier_plugin
+import sslcert
 from backend.ctx_factory import CtxFactory
 
 logger = logging.getLogger(__name__)
-p = 0
-
 
 
 class Echo(Protocol):
@@ -29,7 +28,6 @@ class Echo(Protocol):
     def dataReceived(self, data):
         logger.debug("Received data")
         for message in [line for line in data.split(b"\n") if line]:
-            print(p)
             if json.loads(message)["secret"] == self.factory.secret_manager.get_secret():
                 self.factory.data_callback_fn(message, self)
             else:
@@ -55,12 +53,10 @@ def start_reactor(callback_fn: object, use_keyring, secret_manager: sslcert.Secr
     logger.info("Starting server")
     factory = MyServerFactory(data_callback_fn=callback_fn, secret_manager=secret_manager)
     if use_keyring:
-        p = 2
         key = keyring.get_password("snoty", "key")
         certificate = keyring.get_password("snoty", "cert")
         reactor.listenSSL(port, factory, CtxFactory(key, certificate))
     else:
-        p= 3
         reactor.listenSSL(port, factory,
                           ssl.DefaultOpenSSLContextFactory(
                               'key.pem', 'cert.pem'))

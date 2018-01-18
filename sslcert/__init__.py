@@ -45,7 +45,6 @@ class SecretManager:
             with open("cert.pem", "wb") as cert_file:
                 cert_file.write(cert)
 
-
     def save_key(self, key):
         if self.use_keyring:
             keyring.set_password("snoty", "key", key)
@@ -124,5 +123,3 @@ class SecretManager:
             else:
                 logger.info("Cert and key found in files")
                 return True
-
-

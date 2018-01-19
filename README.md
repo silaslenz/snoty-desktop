@@ -1,3 +1,5 @@
+Mobile application at https://github.com/sg10/snoty-mobile
+
 # Setup
 
 1. Start desktop part with `python3 .` in main folder.

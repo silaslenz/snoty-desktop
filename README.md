@@ -1,4 +1,4 @@
-# Snoty Android App
+# Snoty Desktop App
 
 Snoty is a Secure Notification Listener for Android that mirrors your notifications to the Desktop. It uses SSL Sockets and works inside the internal network. The connection is set up via scanning a QR code. 
 
